@@ -2,11 +2,13 @@ group 'com.5fun'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
+apply plugin: 'maven'
 
 sourceCompatibility = 1.8
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 repositories {
+    mavenLocal()
     maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
     maven { url 'http://repo.maven.apache.org/maven2' }
     maven { url 'https://repo.spring.io/libs-milestone' }
