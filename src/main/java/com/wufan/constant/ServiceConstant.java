@@ -14,9 +14,8 @@ public interface ServiceConstant {
 
 
     /** 腾讯云COS */
-    long appId = 1254307713;
-    String secretId = "AKIDYRCl8Iq7olYDoGekqrhL4eLw1yodtvLb";
-    String secretKey = "CPn4nOn061mLiv1UowuhIhtHHG9rNI4e";
-    String bucketName = "5fun";
-    String region = "sh";
+    long APPID = 1254307713;
+    String SECRETID = "AKIDYRCl8Iq7olYDoGekqrhL4eLw1yodtvLb";
+    String SECRETKEY = "CPn4nOn061mLiv1UowuhIhtHHG9rNI4e";
+    String REGION = "sh";
 }
