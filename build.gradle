@@ -16,6 +16,7 @@ repositories {
 }
 
 dependencies {
+    compile group: 'com.alibaba', name: 'fastjson', version: '1.2.20'
     compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-eureka', version: '2.0.0.M2'
 //    compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-config', version: '2.0.0.M2'
     compile group: 'com.qcloud', name: 'cos_api', version: '4.4', transitive: false

@@ -1,6 +1,7 @@
 package com.wufan.util;
 
 import com.wufan.model.entity.PackInfo;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.Collection;
 
@@ -23,8 +24,12 @@ public class Validator {
     public static void checkPackInfo(PackInfo packInfo) throws Exception {
         checkParamIsNull(packInfo);
         String versionPack = packInfo.getVersionPack();
-        if(versionPack == null || versionPack == "") {
-            throw new Exception("versionPack is empty");
+        if(StringUtils.isBlank(versionPack)) {
+            throw new Exception("versionPack is blank");
+        }
+        String callBackUrl = packInfo.getCallBackUrl();
+        if (StringUtils.isBlank(callBackUrl)) {
+            throw new Exception("callBackUrl is blank");
         }
     }
 

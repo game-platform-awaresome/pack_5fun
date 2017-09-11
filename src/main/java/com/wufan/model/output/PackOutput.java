@@ -2,6 +2,7 @@ package com.wufan.model.output;
 
 import lombok.Data;
 
+import static com.wufan.model.output.OutputStatus.ERROR;
 import static com.wufan.model.output.OutputStatus.SUCCESS;
 
 /**
@@ -21,10 +22,10 @@ public class PackOutput {
         return packOutput;
     }
 
-    public static PackOutput error(String excptionMsg){
+    public static PackOutput error(String exceptionMsg){
         PackOutput packOutput = new PackOutput();
-        packOutput.status = SUCCESS;
-        packOutput.info = excptionMsg;
+        packOutput.status = ERROR;
+        packOutput.info = exceptionMsg;
         packOutput.data = null;
         return packOutput;
     }

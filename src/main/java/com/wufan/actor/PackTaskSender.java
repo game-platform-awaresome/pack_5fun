@@ -22,8 +22,9 @@ import static com.wufan.constant.ServiceConstant.WAITTASKTIME;
  * Created by 7cc on 2017/9/7
  */
 public class PackTaskSender {
-    private static final Logger logger = LoggerFactory.getLogger(PackTaskSender.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PackTaskSender.class);
     private final LinkedBlockingQueue<PackInfo> queue = new LinkedBlockingQueue<>();
+    private final LinkedBlockingQueue<PackInfo> priorityQueue = new LinkedBlockingQueue<>();
     private static PackTaskSender sender = null;
     private Lock lockReceiver = new ReentrantLock();
     private Condition conditionReceiver = lockReceiver.newCondition();
@@ -35,6 +36,13 @@ public class PackTaskSender {
             synchronized (PackTaskSender.class) {
                 if (sender == null) {
                     sender = new PackTaskSender();
+                    // priority thread
+                    Thread priorityThread = new Thread(() -> {
+                        sender.priorityRun();
+                    });
+                    priorityThread.setDaemon(true);
+                    priorityThread.start();
+                    // normal thread
                     Thread sendThread = new Thread(() -> {
                         PackTaskSender.sender.run();
                     });
@@ -46,8 +54,12 @@ public class PackTaskSender {
         return sender;
     }
 
-    public static void addPackInfoToQueue(PackInfo packInfo) throws InterruptedException {
+    public static void addPackInfoIntoQueue(PackInfo packInfo) throws InterruptedException {
         getPackTaskSender().queue.put(packInfo);
+    }
+
+    public static void addPackInfoIntoPriorityQueue(PackInfo packInfo) throws InterruptedException {
+        getPackTaskSender().priorityQueue.put(packInfo);
     }
 
     public List<Callable<PackURL>> getRunningList() {
@@ -60,6 +72,19 @@ public class PackTaskSender {
 
     private volatile List<Callable<PackURL>> runningList = new ArrayList<>();
     long startTime = System.currentTimeMillis();
+
+    private void priorityRun() {
+        while (true) {
+            try {
+                PackInfo packInfo = priorityQueue.take();
+                if(packInfo == null) continue;
+                PackTaskHandler.priorityPackage(new PackTaskCallable(packInfo));
+            } catch (Exception e) {
+                LOGGER.warn(String.format("take packInfo error==%s", e.getMessage()));
+            }
+        }
+
+    }
 
     private void run() {
         // monitor list
@@ -81,7 +106,7 @@ public class PackTaskSender {
                     }
                     Thread.sleep(100);
                 } catch (Throwable e) {
-                    logger.warn(String.format("PackTaskSender send fail cause %s", e.getMessage()));
+                    LOGGER.warn(String.format("PackTaskSender send fail cause %s", e.getMessage()));
                 }
             }
         });
@@ -93,7 +118,7 @@ public class PackTaskSender {
             try {
                 if(runningList.size() < TASKSIZE + 1) {
                     PackInfo packInfo = queue.take();
-                    if(packInfo == null) break;
+                    if(packInfo == null) continue;
                     runningList.add(new PackTaskCallable(packInfo));
                 } else {
                     lockReceiver.lock();

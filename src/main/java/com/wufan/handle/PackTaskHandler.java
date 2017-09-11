@@ -23,18 +23,17 @@ public class PackTaskHandler {
     public static void handlePackTaskList(List<Callable<PackURL>> callables) throws Exception {
         executor.invokeAll(callables).stream().map(future -> {
             try {
-                // TODO 假设这里等很久, 这里如何超时中断呢 ?
                 return future.get();
             }  catch (Exception e) {
                 logger.warn(String.format("thread interrupted exception %s", e.getMessage()));
             }
             return null;
-        }).filter(x -> x != null).forEach(FutureResponse::receive);
+        }).filter(x -> x != null).forEach(FutureResponse::receiveCallBack);
     }
 
     public static void priorityPackage(Callable<PackURL> callable) throws Exception {
         Future<PackURL> future = priorityExecutor.submit(callable);
-        FutureResponse.receive(future.get());
+        FutureResponse.receiveCallBack(future.get());
 }
 
 }

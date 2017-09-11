@@ -12,4 +12,5 @@ public class PackURL {
 
     private String taskId;
     private String cosUrl;
+    private String callBackUrl;
 }

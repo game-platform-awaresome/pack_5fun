@@ -37,4 +37,8 @@ public class PackInfo {
      *  任务开始时间
      */
     private LocalDateTime startTime = LocalDateTime.now();
+    /**
+     *  回调url
+     */
+    private String callBackUrl;
 }

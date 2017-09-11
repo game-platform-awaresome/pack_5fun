@@ -20,15 +20,25 @@ public class PackController {
     private PackService packService;
 
     /**
-     *  通过广告ID和版本打包服务
+     *  通过广告ID和版本打包服务 (直接返回, 等待回调)
+     *
+     * @param packInfo 打包信息|packInfo
+     * @return         打包查询的taskId|回调返回服务器的URL
+     */
+    @PostMapping("/submit")
+    public PackOutput submitPack(@ModelAttribute PackInfo packInfo) throws Exception{
+        return packService.submitPack(packInfo);
+    }
+
+    /**
+     *  通过广告ID和版本打包服务 (等待响应)
      *
      * @param packInfo 打包信息|packInfo
      * @return         打包查询的taskId|打包后在服务器的URL
      */
-    @PostMapping("/submit")
-    public PackOutput packageByVersion(@ModelAttribute PackInfo packInfo) throws Exception{
-        // TODO 需要直接刷一个taskId回去 , 还是等到url拿到后响应回去
-        return packService.packageByVersion(packInfo);
+    @PostMapping("/submitWait")
+    public PackOutput packageWaitByVersion(@ModelAttribute PackInfo packInfo) throws Exception{
+        return packService.packageWaitByVersion(packInfo);
     }
 
     /**

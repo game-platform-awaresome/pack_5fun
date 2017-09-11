@@ -27,13 +27,28 @@ public class PackServiceImpl implements PackService{
     private PackTaskSender packTaskSender = PackTaskSender.getPackTaskSender();
 
     @Override
-    public PackOutput packageByVersion(PackInfo packInfo) throws Exception {
+    public PackOutput submitPack(PackInfo packInfo) throws Exception {
+        Validator.checkPackInfo(packInfo);
+        String taskId = UUID.randomUUID().toString();
+        packInfo.setTaskId(taskId);
+        new FutureResponse(packInfo.getTaskId(), packInfo.getCallBackUrl());
+        // is priority ?
+        if (packInfo.getPriority() == 0) {
+            packTaskSender.addPackInfoIntoQueue(packInfo);
+        } else if (packInfo.getPriority() == 1) {
+            packTaskSender.addPackInfoIntoPriorityQueue(packInfo);
+        }
+        return PackOutput.ok(taskId);
+    }
+
+    @Override
+    public PackOutput packageWaitByVersion(PackInfo packInfo) throws Exception {
         Validator.checkPackInfo(packInfo);
         packInfo.setTaskId(UUID.randomUUID().toString());
         FutureResponse futureResponse = new FutureResponse(packInfo.getTaskId());
         // is priority ?
         if (packInfo.getPriority() == 0) {
-            packTaskSender.addPackInfoToQueue(packInfo);
+            packTaskSender.addPackInfoIntoQueue(packInfo);
         } else if (packInfo.getPriority() == 1) {
             PackTaskHandler.priorityPackage(new PackTaskCallable(packInfo));
         }
