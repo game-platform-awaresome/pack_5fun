@@ -32,7 +32,7 @@ public class PackController {
 
     /**
      *  通过广告ID和版本打包服务 (等待响应)
-     *
+     *  TODO 可删
      * @param packInfo 打包信息|packInfo
      * @return         打包查询的taskId|打包后在服务器的URL
      */
