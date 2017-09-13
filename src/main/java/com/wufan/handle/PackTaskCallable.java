@@ -19,6 +19,8 @@ import java.util.concurrent.Callable;
 public class PackTaskCallable implements Callable<PackURL> {
 
     private static final Logger LOG = LoggerFactory.getLogger(PackTaskCallable.class);
+
+    private static final String bucketName = "5fun";
     private PackInfo packInfo;
 
     public PackTaskCallable(PackInfo packInfo){
@@ -37,14 +39,16 @@ public class PackTaskCallable implements Callable<PackURL> {
         int version = packInfo.getVersion();
         long ad = packInfo.getAd();
         LocalDateTime date = packInfo.getStartTime();
-        String newPackPath = buildNewPackPath(version, ad, date);
-        int i = BatCallUtil.execBat(versionPack, newPackPath, ad);
+        // TODO 测试模式
+//        String newPackPath = buildNewPackPath(version, ad, date);
+        String newPackPath = "F:\\ccccccc\\time.txt";
+//        int i = BatCallUtil.execBat(versionPack, newPackPath, ad);
+        int i = BatCallUtil.testbat();
         if (i != 0) {
             return packURL;
         }
 //            Thread.sleep(7000);
-        // TODO
-        String uploadFileRet = CosUtil.uploadVersionPack("", newPackPath, "");
+        String uploadFileRet = CosUtil.uploadVersionPack(bucketName, newPackPath, "/aaa.txt");
         String cosUrl = CosUtil.getCosUrlByRet(uploadFileRet);
         packURL.setCosUrl(cosUrl);
         packURL.setTaskId(packInfo.getTaskId());

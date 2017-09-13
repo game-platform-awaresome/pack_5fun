@@ -2,6 +2,7 @@ package com.wufan.controller;
 
 import com.wufan.model.entity.PackInfo;
 import com.wufan.model.output.PackOutput;
+import com.wufan.model.output.PackURL;
 import com.wufan.service.PackService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,8 @@ public class PackController {
 
     @Autowired
     private PackService packService;
+
+    private PackURL packURL;
 
     /**
      *  通过广告ID和版本打包服务 (直接返回, 等待回调)
@@ -63,5 +66,14 @@ public class PackController {
     }
 
 
+    @GetMapping("/test")
+    public void test(@ModelAttribute PackURL packURL) throws Exception {
+        this.packURL = packURL;
+    }
+
+    @GetMapping("/getTest")
+    public PackOutput getTest() throws Exception {
+        return PackOutput.ok(packURL);
+    }
 
 }

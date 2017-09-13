@@ -46,7 +46,7 @@ public class CosUtil {
      * @return  sourceUrl
      */
     public static String getCosUrlByRet(String ret) {
-        return ret.split(",")[4]
+        return ret.split(",")[5]
                 .replaceAll("\"", "")
                 .replaceAll("source_url:", "");
     }

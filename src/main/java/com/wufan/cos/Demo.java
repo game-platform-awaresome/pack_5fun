@@ -38,15 +38,15 @@ public class Demo {
         // 1. 上传文件(默认不覆盖)
         // 将本地的local_file_1.txt上传到bucket下的根分区下,并命名为sample_file.txt
         // 默认不覆盖, 如果cos上已有文件, 则返回错误
-        String cosFilePath = "/sample_file0.txt";
-        String localFilePath1 = "src/test/resources/bigfile.txt";
+        String cosFilePath = "/aaaaa.txt";
+        String localFilePath1 = "F:\\ccccccc\\time.txt";
         UploadFileRequest uploadFileRequest =
                 new UploadFileRequest(bucketName, cosFilePath, localFilePath1);
         uploadFileRequest.setEnableShaDigest(false);
         String uploadFileRet = cosClient.uploadFile(uploadFileRequest);
         System.out.println("upload file ret:" + uploadFileRet);
 
-        String url = uploadFileRet.split(",")[4].replaceAll("\"", "").replaceAll("source_url:", "");
+        String url = uploadFileRet.split(",")[5].replaceAll("\"", "").replaceAll("source_url:", "");
         System.out.println(url);
         /**
         // 2. 下载文件

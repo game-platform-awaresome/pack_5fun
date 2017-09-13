@@ -31,6 +31,19 @@ public class BatCallUtil {
                 .append(ad).toString();
     }
 
+    // test method
+    public static int testbat(){
+        Process ps = null;
+        try {
+            ps = runtime.exec("cmd.exe /C start /b F:\\zzzz.bat 1 2 3");
+            ps.waitFor();
+            return ps.exitValue();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
 
     public static int execBat(String versionPackPath, String newPackPath, long ad) {
         String batExecStr = buildCmdStr(versionPackPath, newPackPath, ad);
