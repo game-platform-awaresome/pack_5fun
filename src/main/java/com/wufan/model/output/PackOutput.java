@@ -14,6 +14,14 @@ public class PackOutput {
     private String info;
     private Object data;
 
+    public static PackOutput ok(){
+        return ok(null);
+    }
+
+    public static PackOutput error(){
+        return error(null);
+    }
+
     public static PackOutput ok(Object data){
         PackOutput packOutput = new PackOutput();
         packOutput.status = SUCCESS;
