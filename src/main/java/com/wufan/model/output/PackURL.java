@@ -10,6 +10,7 @@ import lombok.Data;
 @Data
 public class PackURL {
 
+    private int status;
     private String taskId;
     private String cosUrl;
     private String callBackUrl;

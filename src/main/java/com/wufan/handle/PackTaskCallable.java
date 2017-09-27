@@ -1,8 +1,10 @@
 package com.wufan.handle;
 
+import com.alibaba.fastjson.JSONObject;
 import com.wufan.model.entity.PackInfo;
 import com.wufan.model.output.PackURL;
 import com.wufan.util.BatCallUtil;
+import com.wufan.util.ConfigurationManager;
 import com.wufan.util.CosUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.util.concurrent.Callable;
+
+import static com.wufan.util.ConfigurationManager.getProperty;
 
 /**
  * 调用c++脚本,返回taskId 和 url
@@ -20,7 +24,12 @@ public class PackTaskCallable implements Callable<PackURL> {
 
     private static final Logger LOG = LoggerFactory.getLogger(PackTaskCallable.class);
 
-    private static final String bucketName = "5fun";
+    private static final String bucketName = getProperty("bucketName");
+    private static final String outPutFD = getProperty("outPutFD");
+
+    public static int WAITBATPACKTIME =  Integer.valueOf(getProperty("WAITBATPACKTIME"));
+    private static final String versionPackPath = getProperty("versionPackPath");
+
     private PackInfo packInfo;
 
     public PackTaskCallable(PackInfo packInfo){
@@ -35,21 +44,34 @@ public class PackTaskCallable implements Callable<PackURL> {
     //TODO 调用c++脚本,返回taskId|url
     public PackURL call() throws Exception {
         PackURL packURL = new PackURL();
-        String versionPack = packInfo.getVersionPack();
-        int version = packInfo.getVersion();
+        String versionPack = String.format(versionPackPath, packInfo.getVersionPack());
+        String version = packInfo.getVersion();
         long ad = packInfo.getAd();
         LocalDateTime date = packInfo.getStartTime();
         // TODO 测试模式
-//        String newPackPath = buildNewPackPath(version, ad, date);
-        String newPackPath = "F:\\ccccccc\\time.txt";
-//        int i = BatCallUtil.execBat(versionPack, newPackPath, ad);
-        int i = BatCallUtil.testbat();
+        String newPackPath = buildNewPackPath(version, ad, date);
+//        String newPackPath = "F:\\ccccccc\\time.txt";
+        long batExecTime = System.currentTimeMillis();
+        int i = BatCallUtil.execBat(versionPack, newPackPath, ad);
+        Thread.sleep(WAITBATPACKTIME);
+        LOG.info(String.format("batExec status code = %s batExecTime == %s", i, System.currentTimeMillis() - batExecTime));
+//        int i = BatCallUtil.testbat();
         if (i != 0) {
+            packURL.setStatus(-1);
             return packURL;
         }
 //            Thread.sleep(7000);
-        String uploadFileRet = CosUtil.uploadVersionPack(bucketName, newPackPath, "/aaa.txt");
-        String cosUrl = CosUtil.getCosUrlByRet(uploadFileRet);
+        String cosUrl = version + "/" + newPackPath.split("\\\\")[3];
+        String cosFilePath = "/" + cosUrl;
+        String uploadFileRet = CosUtil.uploadVersionPack(bucketName, newPackPath, cosFilePath);
+        LOG.info(String.format("uploadFileRet - %s", uploadFileRet));
+        try {
+            LOG.info(String.format("access url = %s", CosUtil.getCosUrlByRet(uploadFileRet)));
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            cosUrl = "uploadCOS error " + uploadFileRet;
+            packURL.setStatus(-1);
+        }
         packURL.setCosUrl(cosUrl);
         packURL.setTaskId(packInfo.getTaskId());
         return packURL;
@@ -58,9 +80,9 @@ public class PackTaskCallable implements Callable<PackURL> {
     /**
      * @return E:\version\date\round6-version-ad-date.exe
      */
-    private String buildNewPackPath(int version, long ad, LocalDateTime date) {
+    private String buildNewPackPath(String version, long ad, LocalDateTime date) {
         // create new pack dir
-        String fileDirStr = String.format("E:\\%s\\%s", String.valueOf(version), date.withNano(0).toString().split("T")[0]);
+        String fileDirStr = String.format("%s\\%s\\%s", outPutFD, version, date.withNano(0).toString().split("T")[0]);
 
         LOG.info(String.format("fileDirStr == %s",fileDirStr));
 
@@ -75,16 +97,20 @@ public class PackTaskCallable implements Callable<PackURL> {
         try {
             filePathExe = String.format(filePathExe,
                     String.valueOf((int)((Math.random()*9+1)*100000)),
-                    String.valueOf(version),
+                    version,
                     String.valueOf(ad),
-                    date.withNano(0).toString());
+                    date.withNano(0).toString().replaceAll(":", ""));
 
             LOG.info(String.format("filePathExe == %s",filePathExe));
             return filePathExe;
         } catch (Exception e) {
-            LOG.error("buildNewPackPath fail - version==%s - ad==%s - exception==%s", version, ad, e.getMessage());
+            LOG.error(String.format("buildNewPackPath fail - version==%s - ad==%s - exception==%s", version, ad, e.getMessage()), e);
         }
         return null;
+    }
+
+    public String toJsonString() {
+        return JSONObject.toJSONString(packInfo);
     }
 
 }

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
 
 /**
  * Created by 7cc on 2017/9/10
@@ -19,8 +20,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = Exception.class)
     @ResponseBody
     public PackOutput jsonErrorHandler(HttpServletRequest req, Exception e) throws Exception {
-        LOG.error(String.format("GlobalException - %s", e.getMessage()));
-        return PackOutput.error(e.getMessage());
+        String globalInfo = String.format("GlobalException - %s - %s", LocalDateTime.now().toString(), e.getMessage());
+        LOG.error(globalInfo, e);
+        return PackOutput.error(globalInfo);
     }
 
 }

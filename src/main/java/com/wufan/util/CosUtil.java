@@ -25,6 +25,18 @@ public class CosUtil {
     }
 
     /**
+     *  get source url
+     *
+     * @param ret
+     * @return  sourceUrl
+     */
+    public static String getCosUrlByRet(String ret) {
+        return ret.split(",")[4]
+                .replaceAll("\"", "")
+                .replaceAll("source_url:", "");
+    }
+
+    /**
      *   upload file into cos return ret
      *
      * @param bucketName
@@ -37,17 +49,5 @@ public class CosUtil {
                 new UploadFileRequest(bucketName, cosFilePath, localFilePath);
         uploadFileRequest.setEnableShaDigest(false);
         return cosClient.uploadFile(uploadFileRequest);
-    }
-
-    /**
-     *  get source url
-     *
-     * @param ret
-     * @return  sourceUrl
-     */
-    public static String getCosUrlByRet(String ret) {
-        return ret.split(",")[5]
-                .replaceAll("\"", "")
-                .replaceAll("source_url:", "");
     }
 }

@@ -34,9 +34,9 @@ public class PackServiceImpl implements PackService{
         new FutureResponse(packInfo.getTaskId(), packInfo.getCallBackUrl());
         // is priority ?
         if (packInfo.getPriority() == 0) {
-            packTaskSender.addPackInfoIntoQueue(packInfo);
+            PackTaskSender.addPackInfoIntoQueue(packInfo);
         } else if (packInfo.getPriority() == 1) {
-            packTaskSender.addPackInfoIntoPriorityQueue(packInfo);
+            PackTaskSender.addPackInfoIntoPriorityQueue(packInfo);
         }
         return PackOutput.ok(taskId);
     }
@@ -48,9 +48,9 @@ public class PackServiceImpl implements PackService{
         FutureResponse futureResponse = new FutureResponse(packInfo.getTaskId());
         // is priority ?
         if (packInfo.getPriority() == 0) {
-            packTaskSender.addPackInfoIntoQueue(packInfo);
+            PackTaskSender.addPackInfoIntoQueue(packInfo);
         } else if (packInfo.getPriority() == 1) {
-            PackTaskHandler.priorityPackage(new PackTaskCallable(packInfo));
+//            PackTaskHandler.priorityPackage(new PackTaskCallable(packInfo));
         }
         PackURL packURL = futureResponse.get();
         return PackOutput.ok(packURL);
@@ -60,7 +60,7 @@ public class PackServiceImpl implements PackService{
     public PackOutput getPackingTaskDetail() throws Exception {
         Collection<PackInfo> waitingTasks = getWaitingTasks();
         Collection<PackInfo> runningTasks = getRunningTasks();
-        Map<PackStatus, Collection<PackInfo>> map = new HashMap();
+        Map<PackStatus, Collection<PackInfo>> map = new HashMap<>();
         map.put(WAITING, waitingTasks);
         map.put(RUNNING, runningTasks);
         return PackOutput.ok(map);
@@ -79,7 +79,7 @@ public class PackServiceImpl implements PackService{
 
     private boolean getTaskIdIsExistsByMethod(PackingTasks packingTasks, String taskId) {
         return packingTasks.getPackingTasks().stream()
-                .map(packInfo -> packInfo.getTaskId())
+                .map(PackInfo::getTaskId)
                 .anyMatch(id -> id.equals(taskId));
     }
 

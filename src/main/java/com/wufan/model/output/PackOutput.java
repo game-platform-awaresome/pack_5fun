@@ -10,6 +10,7 @@ import static com.wufan.model.output.OutputStatus.SUCCESS;
  */
 @Data
 public class PackOutput {
+
     private OutputStatus status;
     private String info;
     private Object data;

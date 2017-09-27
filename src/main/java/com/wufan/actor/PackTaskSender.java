@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -25,6 +26,7 @@ public class PackTaskSender {
     private static final Logger LOGGER = LoggerFactory.getLogger(PackTaskSender.class);
     private final LinkedBlockingQueue<PackInfo> queue = new LinkedBlockingQueue<>();
     private final LinkedBlockingQueue<PackInfo> priorityQueue = new LinkedBlockingQueue<>();
+    private final LinkedBlockingQueue<Future<PackURL>> priorityFutureQueue = new LinkedBlockingQueue<>();
     private static PackTaskSender sender = null;
     private Lock lockReceiver = new ReentrantLock();
     private Condition conditionReceiver = lockReceiver.newCondition();
@@ -48,6 +50,12 @@ public class PackTaskSender {
                     });
                     sendThread.setDaemon(true);
                     sendThread.start();
+                    // priority future thread
+                    Thread priorityFutureThread = new Thread(() -> {
+                        PackTaskSender.sender.priorityFutureRun();
+                    });
+                    priorityFutureThread.setDaemon(true);
+                    priorityFutureThread.start();
                 }
             }
         }
@@ -78,24 +86,45 @@ public class PackTaskSender {
             try {
                 PackInfo packInfo = priorityQueue.take();
                 if(packInfo == null) continue;
-                PackTaskHandler.priorityPackage(new PackTaskCallable(packInfo));
+                Future<PackURL> future = PackTaskHandler.priorityExecutor.submit(new PackTaskCallable(packInfo));
+                priorityFutureQueue.put(future);
             } catch (Exception e) {
-                LOGGER.warn(String.format("take packInfo error==%s", e.getMessage()));
+                LOGGER.warn(String.format("take packInfo error==%s", e.getMessage()), e);
             }
         }
 
     }
 
+    private void priorityFutureRun() {
+        while (true) {
+            try {
+                Future<PackURL> future = priorityFutureQueue.take();
+                if(future == null) continue;
+                LOGGER.info("===================execute priority==================");
+                PackURL futurePackURL = future.get();
+                FutureResponse.receiveCallBack(futurePackURL);
+            } catch (Exception e) {
+                LOGGER.warn(String.format("take priority future error==%s", e.getMessage()), e);
+            }
+        }
+    }
+
     private void run() {
         // monitor list
         Thread monitorThread = new Thread(() -> {
+            List<Callable<PackURL>> trackList = new ArrayList<>();
             while (true) {
                 try {
                     if (runningList.size() > TASKSIZE ||
                             (System.currentTimeMillis() - startTime > WAITTASKTIME && runningList.size() > 0 && !runningList.isEmpty())) {
-                        System.out.println("===================execute==================");
+                        LOGGER.info("===================execute batch==================");
+                        // 记录执行的任务
+                        trackList.addAll(runningList);
                         PackTaskHandler.handlePackTaskList(runningList);
-                        runningList = new ArrayList<>();
+                        // 执行完后 , 删除被记录的
+                        runningList.removeAll(trackList);
+                        // 清空记录数组
+                        trackList.clear();
                         startTime = System.currentTimeMillis();
                         lockReceiver.lock();
                         try {
@@ -106,7 +135,7 @@ public class PackTaskSender {
                     }
                     Thread.sleep(100);
                 } catch (Throwable e) {
-                    LOGGER.warn(String.format("PackTaskSender send fail cause %s", e.getMessage()));
+                    LOGGER.warn(String.format("PackTaskSender send fail cause %s", e.getMessage()), e);
                 }
             }
         });
@@ -129,6 +158,7 @@ public class PackTaskSender {
                     }
                 }
             } catch (Throwable e) {
+                LOGGER.error(e.getMessage(), e);
                 throw new RuntimeException(String.format("exception %s", e.getMessage()));
             }
         }

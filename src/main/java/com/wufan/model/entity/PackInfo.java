@@ -16,7 +16,7 @@ public class PackInfo {
     /**
      *  版本
      */
-    private int version;
+    private String version;
     /**
      *  版本包
      */
@@ -30,13 +30,9 @@ public class PackInfo {
      */
     private String taskId;
     /**
-     *  执行状态    失败:1|正常:0
-     */
-    private int taskStatus;
-    /**
      *  任务开始时间
      */
-    private LocalDateTime startTime = LocalDateTime.now();
+    private final LocalDateTime startTime = LocalDateTime.now();
     /**
      *  回调url
      */

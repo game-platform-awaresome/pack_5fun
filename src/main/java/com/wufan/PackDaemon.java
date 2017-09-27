@@ -11,7 +11,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableSwagger2
 @SpringBootApplication
-@EnableDiscoveryClient
+//@EnableDiscoveryClient
 public class PackDaemon {
 
     public static void main(String[] args){

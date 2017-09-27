@@ -66,7 +66,7 @@ public class FutureResponse {
             String callBackUrl = buildCallBackUrl(packURL);
             HttpRequestUtil.sendUrl(callBackUrl);
         } catch (Throwable e) {
-            LOG.error(String.format("receiveCallBack fail - packURL==%s - error info==%s", JSONObject.toJSON(packURL), e.getMessage()));
+            LOG.error(String.format("receiveCallBack fail - packURL==%s - error info==%s", JSONObject.toJSON(packURL), e.getMessage()), e);
         }
 
     }
@@ -75,10 +75,13 @@ public class FutureResponse {
         String callBackUrl = packURL.getCallBackUrl();
         String cosUrl = packURL.getCosUrl();
         String taskId = packURL.getTaskId();
+        String status = String.valueOf(packURL.getStatus());
 
-        return new StringBuilder(callBackUrl)
-                .append("?taskId=")
+        return new StringBuilder(callBackUrl.trim())
+                .append("&taskId=")
                 .append(URLEncoder.encode(taskId.trim(),"utf-8"))
+                .append("&status=")
+                .append(URLEncoder.encode(status.trim(),"utf-8"))
                 .append("&cosUrl=")
                 .append(URLEncoder.encode(cosUrl.trim(),"utf-8"))
                 .toString();
@@ -130,7 +133,6 @@ public class FutureResponse {
                 con.setReadTimeout(5000);
                 con.setRequestMethod("GET");
 
-                System.out.println(String.format("Callback - sendUrl:%s", callBackUrl));
                 LOG.info(String.format("Callback - sendUrl:%s", callBackUrl));
                 in = new BufferedReader(new InputStreamReader(con.getInputStream()));
             } finally {

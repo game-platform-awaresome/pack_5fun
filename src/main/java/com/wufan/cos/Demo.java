@@ -39,7 +39,7 @@ public class Demo {
         // 将本地的local_file_1.txt上传到bucket下的根分区下,并命名为sample_file.txt
         // 默认不覆盖, 如果cos上已有文件, 则返回错误
         String cosFilePath = "/aaaaa.txt";
-        String localFilePath1 = "F:\\ccccccc\\time.txt";
+        String localFilePath1 = "F:\\1.exe";
         UploadFileRequest uploadFileRequest =
                 new UploadFileRequest(bucketName, cosFilePath, localFilePath1);
         uploadFileRequest.setEnableShaDigest(false);
