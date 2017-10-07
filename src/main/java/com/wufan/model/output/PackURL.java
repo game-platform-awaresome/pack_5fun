@@ -13,5 +13,8 @@ public class PackURL {
     private int status;
     private String taskId;
     private String cosUrl;
+    private Integer newPackSize;
+    private String sizeErrorInfo = "succeed";
     private String callBackUrl;
+
 }

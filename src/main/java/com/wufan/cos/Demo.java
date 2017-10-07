@@ -4,8 +4,10 @@
  */
 package com.wufan.cos;
 
+import com.alibaba.fastjson.JSONObject;
 import com.qcloud.cos.COSClient;
 import com.qcloud.cos.ClientConfig;
+import com.qcloud.cos.request.StatFileRequest;
 import com.qcloud.cos.request.UploadFileRequest;
 import com.qcloud.cos.sign.Credentials;
 
@@ -19,11 +21,11 @@ public class Demo {
 
         // 设置用户属性, 包括appid, secretId和SecretKey
         // 这些属性可以通过cos控制台获取(https://console.qcloud.com/cos)
-        long appId = 1254307713;
-        String secretId = "AKIDYRCl8Iq7olYDoGekqrhL4eLw1yodtvLb";
-        String secretKey = "CPn4nOn061mLiv1UowuhIhtHHG9rNI4e";
+        long appId = 1254280453;
+        String secretId = "AKIDDTbN3Yp7C6rVyFHzOfbQ4Wq0zlOq7C6a";
+        String secretKey = "b1PdgZq10pTvCICu35xg6YilcImT1tlT";
         // 设置要操作的bucket
-        String bucketName = "5fun";
+        String bucketName = "pcclient";
         // 初始化客户端配置
         ClientConfig clientConfig = new ClientConfig();
         // 设置bucket所在的区域，比如广州(gz), 天津(tj)
@@ -38,16 +40,16 @@ public class Demo {
         // 1. 上传文件(默认不覆盖)
         // 将本地的local_file_1.txt上传到bucket下的根分区下,并命名为sample_file.txt
         // 默认不覆盖, 如果cos上已有文件, 则返回错误
-        String cosFilePath = "/aaaaa.txt";
-        String localFilePath1 = "F:\\1.exe";
-        UploadFileRequest uploadFileRequest =
-                new UploadFileRequest(bucketName, cosFilePath, localFilePath1);
-        uploadFileRequest.setEnableShaDigest(false);
-        String uploadFileRet = cosClient.uploadFile(uploadFileRequest);
-        System.out.println("upload file ret:" + uploadFileRet);
-
-        String url = uploadFileRet.split(",")[5].replaceAll("\"", "").replaceAll("source_url:", "");
-        System.out.println(url);
+//        String cosFilePath = "/aaaaa.txt";
+//        String localFilePath1 = "F:\\1.exe";
+//        UploadFileRequest uploadFileRequest =
+//                new UploadFileRequest(bucketName, cosFilePath, localFilePath1);
+//        uploadFileRequest.setEnableShaDigest(false);
+//        String uploadFileRet = cosClient.uploadFile(uploadFileRequest);
+//        System.out.println("upload file ret:" + uploadFileRet);
+//
+//        String url = uploadFileRet.split(",")[5].replaceAll("\"", "").replaceAll("source_url:", "");
+//        System.out.println(url);
         /**
         // 2. 下载文件
         String localPathDown = "src/test/resources/local_file_down.txt";
@@ -68,12 +70,14 @@ public class Demo {
         overWriteFileRequest.setInsertOnly(InsertOnly.OVER_WRITE);
         String overWriteFileRet = cosClient.uploadFile(overWriteFileRequest);
         System.out.println("overwrite file ret:" + overWriteFileRet);
-
+*/
         // 4. 获取文件属性
-        StatFileRequest statFileRequest = new StatFileRequest(bucketName, cosFilePath);
+        StatFileRequest statFileRequest = new StatFileRequest(bucketName, "/1.1.8/135214-1.1.8-2233-2017-09-28T113419.exe");
         String statFileRet = cosClient.statFile(statFileRequest);
+        Integer a = JSONObject.parseObject(statFileRet).getJSONObject("data").getInteger("filesize1");
+        System.out.println(a);
         System.out.println("stat file ret:" + statFileRet);
-
+/**
         // 5. 更新文件属性
         UpdateFileRequest updateFileRequest = new UpdateFileRequest(bucketName, cosFilePath);
         updateFileRequest.setBizAttr("测试目录");

@@ -24,7 +24,6 @@ public class PackTaskCallable implements Callable<PackURL> {
 
     private static final Logger LOG = LoggerFactory.getLogger(PackTaskCallable.class);
 
-    private static final String bucketName = getProperty("bucketName");
     private static final String outPutFD = getProperty("outPutFD");
 
     public static int WAITBATPACKTIME =  Integer.valueOf(getProperty("WAITBATPACKTIME"));
@@ -63,7 +62,7 @@ public class PackTaskCallable implements Callable<PackURL> {
 //            Thread.sleep(7000);
         String cosUrl = version + "/" + newPackPath.split("\\\\")[3];
         String cosFilePath = "/" + cosUrl;
-        String uploadFileRet = CosUtil.uploadVersionPack(bucketName, newPackPath, cosFilePath);
+        String uploadFileRet = CosUtil.uploadVersionPack(newPackPath, cosFilePath);
         LOG.info(String.format("uploadFileRet - %s", uploadFileRet));
         try {
             LOG.info(String.format("access url = %s", CosUtil.getCosUrlByRet(uploadFileRet)));
@@ -73,6 +72,13 @@ public class PackTaskCallable implements Callable<PackURL> {
             packURL.setStatus(-1);
         }
         packURL.setCosUrl(cosUrl);
+        String fileAttributeJson = CosUtil.getFileAttributeJson(cosFilePath);
+        LOG.info(String.format("fileAttributeJson - %s", fileAttributeJson));
+        Integer fileSize = CosUtil.getFileSizeByAttributeJson(fileAttributeJson);
+        if (fileSize == null) {
+            packURL.setSizeErrorInfo(fileAttributeJson);
+        }
+        packURL.setNewPackSize(fileSize);
         packURL.setTaskId(packInfo.getTaskId());
         return packURL;
     }

@@ -76,6 +76,8 @@ public class FutureResponse {
         String cosUrl = packURL.getCosUrl();
         String taskId = packURL.getTaskId();
         String status = String.valueOf(packURL.getStatus());
+        String newPackSize = String.valueOf(packURL.getNewPackSize());
+        String sizeErrorInfo = packURL.getSizeErrorInfo();
 
         return new StringBuilder(callBackUrl.trim())
                 .append("&taskId=")
@@ -84,6 +86,10 @@ public class FutureResponse {
                 .append(URLEncoder.encode(status.trim(),"utf-8"))
                 .append("&cosUrl=")
                 .append(URLEncoder.encode(cosUrl.trim(),"utf-8"))
+                .append("&newPackSize=")
+                .append(URLEncoder.encode(newPackSize.trim(),"utf-8"))
+                .append("&sizeErrorInfo=")
+                .append(URLEncoder.encode(sizeErrorInfo.trim(),"utf-8"))
                 .toString();
     }
 
